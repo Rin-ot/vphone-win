@@ -17,6 +17,7 @@ make -C .build/linux-apfs-rw CC=gcc-13 KERNEL_DIR="$PWD/.build/wsl-kernel-$rel"
 ls -la .build/linux-apfs-rw/apfs.ko
 modinfo .build/linux-apfs-rw/apfs.ko | grep -E 'vermagic' || true
 echo "vermagic must match: $rel"
-# Then finish the setup's release phase the way setup.sh would have; the
-# simplest reliable route is to re-run setup.sh - it skips finished steps.
-./setup/setup.sh -y
+# Finish with ONLY the release phase. Do NOT re-run the full setup.sh:
+# its build phase re-enters build_apfs, points at the stub headers again
+# and fails the same way, even though apfs.ko is already built.
+./setup/setup.sh release -y

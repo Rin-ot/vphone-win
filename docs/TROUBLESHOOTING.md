@@ -17,6 +17,10 @@ only uses it when that `/lib/modules/.../build` path does *not* exist -
 and the stub is a busy mount, so it cannot be moved aside either.
 Fix: build the module manually against the self-built tree -
 `scripts/wsl/02-build-apfs.sh`. Check `vermagic` matches `uname -r`.
+Then finish with `./setup/setup.sh release -y` (release phase only).
+Re-running the full `setup.sh` does not finish the job: its build phase
+re-enters this step, points at the stub headers again and fails the
+same way, even with `apfs.ko` already built.
 
 ## 3. create-vm: "The device did not enter dfu/recovery mode in time"
 The guest *was* in DFU; the attach never happened. Ubuntu's
