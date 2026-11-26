@@ -30,6 +30,12 @@ iOS home screen. Measured timings on this machine: IPSW download (10.5 GB)
 ~14 min; first-boot data migration ~14 min (after the tuning in step 6);
 a normal boot to "up and unlocked" ~7 min.
 
+> **Note:** the Ubuntu distro for WSL is a console-only (server) image -
+> WSL has no desktop edition, and none is needed here. Every step runs in
+> a terminal; the guest's screen is shown by QEMU's window (a WSLg app
+> window on your Windows desktop) or captured through the screenshot RPC
+> used in step 9.
+
 ## Procedure
 
 Windows side (elevated PowerShell), in order:
