@@ -129,7 +129,9 @@ curl --silent --retry 3 --location --fail https://swift.org/keys/all-keys.asc | 
 ./setup/setup.sh -y
 ```
 If the import itself errors, check what was actually fetched -
-`curl -s https://swift.org/keys/all-keys.asc | head -2` must start with
-`-----BEGIN PGP PUBLIC KEY BLOCK-----`. Anything else (an HTML block
-page, an empty reply) means the key server is unreachable from your
-network, which is a different problem than the keyring.
+`curl -sL https://swift.org/keys/all-keys.asc | head -2` must start with
+`-----BEGIN PGP PUBLIC KEY BLOCK-----` (keep the `-L`: without it you
+only see swift.org's redirect page). If it is still HTML with `-L`, it
+is likely your proxy's block page - its `<title>` usually says so - and
+the key server is unreachable from your network, which is a different
+problem than the keyring.
