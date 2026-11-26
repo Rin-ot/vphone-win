@@ -60,7 +60,12 @@ WSL side (Ubuntu):
    ```bash
    git clone https://github.com/YahiaAngelo/vphone-linux
    cd vphone-linux
-   ./tools/check-host.sh        # expect: RAM and /dev/shm warnings on 16 GB
+   ./tools/check-host.sh        # run BEFORE setup: the dependency warnings
+                                # (Rust, meson/ninja, lzfse, libxml2, usbip)
+                                # are exactly what setup.sh installs next,
+                                # so they are expected at this point. Only
+                                # the RAM and /dev/shm warnings remain on a
+                                # 16 GB host, and both are fine (see below).
    ./setup/setup.sh -y          # builds QEMU, vphone-cli, reims-vgpu, ...
    ```
    If the final `linux-apfs-rw` step fails, use `scripts/wsl/02-build-apfs.sh`
