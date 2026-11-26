@@ -1,0 +1,10 @@
+# Copy to %UserProfile%\.wslconfig and restart WSL (wsl --shutdown).
+# Values below are what a 16 GB host machine actually needed: the iOS guest
+# gets 8 GB, QEMU's total footprint measured ~11.3 GB, so 12 GB for WSL was
+# NOT enough (swap thrashing slowed the guest until iOS's data-migration
+# watchdog killed it - see docs/TROUBLESHOOTING.md). 14 GB worked.
+# Scale memory to your host: leave ~2 GB for Windows itself.
+[wsl2]
+memory=14GB
+processors=16
+swap=8GB
