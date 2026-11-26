@@ -72,3 +72,30 @@ just re-run `create-vm.sh`; the plain (non-migrating) boot verifies fast.
 - "warning: / stayed read-only, so no 1x boot logo was written" is cosmetic.
 - Networking and audio inside the guest are upstream-untested; this setup
   verifies boot, unlock, rendering and screenshots only.
+
+## 11. apt cannot reach the Ubuntu archives on a restricted network
+Symptom: `setup.sh` dies at the package step - every fetch from
+archive.ubuntu.com / security.ubuntu.com times out (IPv6 "Network is
+unreachable", IPv4 "connection timed out") - and the run then ends with a
+misleading "this release has no clang lld ninja-build ..." error. The
+release is fine; apt simply downloaded nothing.
+Cause: the network blocks direct egress (proxy-only LANs, or port 80
+blocked while 443 is allowed). WSL does not inherit Windows' proxy
+settings, and DNS resolving correctly does not mean traffic can leave.
+Diagnose inside WSL:
+```bash
+curl -sI https://archive.ubuntu.com/ubuntu/ | head -1   # port 443 test
+```
+Fixes, depending on the result:
+- **443 answers:** switch apt to HTTPS sources and re-run setup.sh:
+  ```bash
+  sudo sed -i 's|http://archive.ubuntu.com|https://archive.ubuntu.com|g; s|http://security.ubuntu.com|https://security.ubuntu.com|g' /etc/apt/sources.list.d/ubuntu.sources
+  sudo apt update
+  ```
+  The later downloads (rustup, GitHub, the IPSW) are all HTTPS too.
+- **443 also times out:** the LAN is proxy-only. Take the proxy host:port
+  from Windows' proxy settings and give it to apt persistently:
+  ```bash
+  echo 'Acquire::http::Proxy "http://PROXY:PORT"; Acquire::https::Proxy "http://PROXY:PORT";' | sudo tee /etc/apt/apt.conf.d/95proxy
+  export http_proxy=http://PROXY:PORT https_proxy=http://PROXY:PORT   # for git/curl/rustup in your shell
+  ```
