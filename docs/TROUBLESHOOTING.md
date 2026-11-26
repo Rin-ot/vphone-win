@@ -131,7 +131,13 @@ curl --silent --retry 3 --location --fail https://swift.org/keys/all-keys.asc | 
 If the import itself errors, check what was actually fetched -
 `curl -sL https://swift.org/keys/all-keys.asc | head -2` must start with
 `-----BEGIN PGP PUBLIC KEY BLOCK-----` (keep the `-L`: without it you
-only see swift.org's redirect page). If it is still HTML with `-L`, it
-is likely your proxy's block page - its `<title>` usually says so - and
-the key server is unreachable from your network, which is a different
-problem than the keyring.
+only see swift.org's redirect page). Two other measured outcomes:
+- Still HTML with `-L`: likely your proxy's block page - its `<title>`
+  usually says so - and the key server is unreachable from your network.
+- Binary garbage instead of text: the proxy/CDN is force-compressing
+  responses. This is also what breaks swiftly's own import (it writes
+  the compressed bytes as the "key file"). Retry with `--compressed`:
+  ```bash
+  curl --compressed -sL https://swift.org/keys/all-keys.asc | head -2   # expect the PGP header
+  curl --compressed --silent --retry 3 --location --fail https://swift.org/keys/all-keys.asc | gpg --import -
+  ```
