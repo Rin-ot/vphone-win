@@ -13,5 +13,17 @@ dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /nores
 "DISM2 exit=$LASTEXITCODE" | Out-File -FilePath $log -Append -Encoding utf8
 Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux | Out-String | Out-File -FilePath $log -Append -Encoding utf8
 Get-WindowsOptionalFeature -Online -FeatureName VirtualMachinePlatform | Out-String | Out-File -FilePath $log -Append -Encoding utf8
+# Place .wslconfig now (README step 2), before any distro is installed:
+# WSL reads it when its VM starts. An existing .wslconfig is left untouched.
+$wslExample = Join-Path $PSScriptRoot '..\..\wslconfig.example'
+$wslTarget = Join-Path $env:USERPROFILE '.wslconfig'
+if (Test-Path $wslTarget) {
+  ".wslconfig already exists at $wslTarget - left as-is" | Out-File -FilePath $log -Append -Encoding utf8
+} elseif (Test-Path $wslExample) {
+  Copy-Item $wslExample $wslTarget
+  ".wslconfig placed at $wslTarget (from wslconfig.example)" | Out-File -FilePath $log -Append -Encoding utf8
+} else {
+  "wslconfig.example not found next to this script - copy it to $wslTarget manually" | Out-File -FilePath $log -Append -Encoding utf8
+}
 "[done] $(Get-Date -Format o)" | Out-File -FilePath $log -Append -Encoding utf8
 Write-Output "Done. Reboot Windows now, then continue with 02-install-wsl-msi.ps1 (log: $log)"

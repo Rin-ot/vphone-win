@@ -35,8 +35,10 @@ a normal boot to "up and unlocked" ~7 min.
 Windows side (elevated PowerShell), in order:
 
 1. `scripts/windows/01-enable-wsl-features.ps1` - enable WSL +
-   VirtualMachinePlatform, then **reboot**.
-2. Copy `wslconfig.example` to `%UserProfile%\.wslconfig`.
+   VirtualMachinePlatform, then **reboot**. The script also places
+   `.wslconfig` at `%UserProfile%\.wslconfig` (copied from
+   `wslconfig.example`) if you do not have one yet.
+2. Check `%UserProfile%\.wslconfig` and adjust it to your host.
    On a 16 GB host use `memory=14GB` - 12 GB measurably fails (see
    Troubleshooting #4). Leave ~2 GB for Windows.
 3. `scripts/windows/02-install-wsl-msi.ps1` - install the WSL core from
