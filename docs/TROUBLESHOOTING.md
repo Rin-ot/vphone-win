@@ -86,16 +86,25 @@ Diagnose inside WSL:
 ```bash
 curl -sI https://archive.ubuntu.com/ubuntu/ | head -1   # port 443 test
 ```
-Fixes, depending on the result:
-- **443 answers:** switch apt to HTTPS sources and re-run setup.sh:
+Fixes, depending on the first line of the test:
+- **`HTTP/1.1 200 Connection established`:** a proxy answered - HTTPS
+  works *through a proxy* that your shell already knows
+  (`env | grep -i proxy`), but apt run under sudo does not inherit shell
+  variables. Persist the same proxy for apt, then re-run setup.sh:
+  ```bash
+  P="${https_proxy:-$HTTPS_PROXY}"; echo "proxy=$P"   # must not be empty
+  echo "Acquire::http::Proxy \"$P\"; Acquire::https::Proxy \"$P\";" | sudo tee /etc/apt/apt.conf.d/95proxy
+  sudo apt update
+  ```
+- **A plain `HTTP/2 200` / `HTTP/1.1 200 OK` with no proxy involved:**
+  direct 443 works and only port 80 is blocked. Switch apt to HTTPS
+  sources instead:
   ```bash
   sudo sed -i 's|http://archive.ubuntu.com|https://archive.ubuntu.com|g; s|http://security.ubuntu.com|https://security.ubuntu.com|g' /etc/apt/sources.list.d/ubuntu.sources
   sudo apt update
   ```
-  The later downloads (rustup, GitHub, the IPSW) are all HTTPS too.
-- **443 also times out:** the LAN is proxy-only. Take the proxy host:port
-  from Windows' proxy settings and give it to apt persistently:
-  ```bash
-  echo 'Acquire::http::Proxy "http://PROXY:PORT"; Acquire::https::Proxy "http://PROXY:PORT";' | sudo tee /etc/apt/apt.conf.d/95proxy
-  export http_proxy=http://PROXY:PORT https_proxy=http://PROXY:PORT   # for git/curl/rustup in your shell
-  ```
+- **The test itself times out:** the LAN is proxy-only and no proxy is
+  configured yet. Take the proxy host:port from Windows' proxy settings,
+  write it into `/etc/apt/apt.conf.d/95proxy` as above, and
+  `export http_proxy=... https_proxy=...` for git/curl/rustup in your
+  shell.
