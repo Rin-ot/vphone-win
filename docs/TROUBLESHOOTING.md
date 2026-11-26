@@ -96,6 +96,12 @@ Fixes, depending on the first line of the test:
   echo "Acquire::http::Proxy \"$P\"; Acquire::https::Proxy \"$P\";" | sudo tee /etc/apt/apt.conf.d/95proxy
   sudo apt update
   ```
+  Follow-up symptom in this setup: most packages download, but a few
+  `.deb` fetches fail with `400 Bad Request [IP: <proxy>]`. First just
+  re-run `setup.sh` - apt refetches only the missing files and transient
+  proxy errors often pass. If the same files keep failing, switch the
+  sources to HTTPS (next bullet): over CONNECT the proxy only tunnels
+  and can no longer interfere with individual file requests.
 - **A plain `HTTP/2 200` / `HTTP/1.1 200 OK` with no proxy involved:**
   direct 443 works and only port 80 is blocked. Switch apt to HTTPS
   sources instead:
