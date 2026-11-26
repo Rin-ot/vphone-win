@@ -145,3 +145,18 @@ only see swift.org's redirect page). Two other measured outcomes:
   curl --compressed -sL https://swift.org/keys/all-keys.asc | head -2   # expect the PGP header
   curl --compressed --silent --retry 3 --location --fail https://swift.org/keys/all-keys.asc | gpg --import -
   ```
+
+## 13. create-vm prepare: "Truncated ZIP file data" (cached IPSW damaged)
+Symptom: `fw prepare` starts extracting the iPhone IPSW and fails with
+`Unable to read <member data> (Truncated ZIP file data). The file may
+be damaged.` An IPSW is a ZIP whose index sits at the end of the file,
+so a download that was interrupted hard - e.g. the host disk filled up
+mid-transfer and later "resumed" - leaves a cached file that passes a
+casual size check but breaks on extraction.
+Fix: delete only the damaged iPhone IPSW from the cache (keep the
+cloudOS IPSW - it is verified separately and re-downloading it wastes
+~an hour), make sure the host drive has ample free space again, then
+re-run create-vm; completed steps are not redone.
+```bash
+rm ~/.cache/vphone/iPhone17,3_26.6.2_23G90_Restore.ipsw*
+```
