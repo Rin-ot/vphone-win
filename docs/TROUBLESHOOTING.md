@@ -114,3 +114,22 @@ Fixes, depending on the first line of the test:
   write it into `/etc/apt/apt.conf.d/95proxy` as above, and
   `export http_proxy=... https_proxy=...` for git/curl/rustup in your
   shell.
+
+## 12. setup.sh: swiftly fails importing the Swift signing keys (gpg exit 2)
+Symptom: during the Swift toolchain install, setup dies with
+`RunProgramError(... executable(gpg), arguments: ["--import", "/tmp/swiftly-..."])`
+and `exited(2)`. swiftly verifies the toolchain signature with gpg and
+needs Swift's current signing keys in your keyring; when its own key
+fetch/import fails (seen behind proxies, and with stale keyrings), the
+import exits 2 and the whole setup stops.
+Fix: import the keys yourself with curl first (curl honors the proxy
+environment), then re-run setup.sh:
+```bash
+curl --silent --retry 3 --location --fail https://swift.org/keys/all-keys.asc | gpg --import -
+./setup/setup.sh -y
+```
+If the import itself errors, check what was actually fetched -
+`curl -s https://swift.org/keys/all-keys.asc | head -2` must start with
+`-----BEGIN PGP PUBLIC KEY BLOCK-----`. Anything else (an HTML block
+page, an empty reply) means the key server is unreachable from your
+network, which is a different problem than the keyring.
