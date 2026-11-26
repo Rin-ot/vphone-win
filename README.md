@@ -54,7 +54,8 @@ Windows side (elevated PowerShell), in order:
 5. `scripts/windows/04-init-ubuntu-user.ps1` - create the user, enable
    systemd, set the default user. Then `wsl --shutdown` once.
 
-WSL side (Ubuntu):
+WSL side (run inside the Ubuntu terminal - the `bash` command in
+PowerShell cannot execute these scripts):
 
 6. Clone upstream and build:
    ```bash
